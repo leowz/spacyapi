@@ -9,7 +9,7 @@ from spacy.symbols import ENT_TYPE, TAG, DEP
 import spacy.about
 import spacy.util
 
-from .parse import Parse, Entities
+from .parse import Parse, Entities, Similar
 
 
 MODELS = os.getenv("languages", "").split()
@@ -128,6 +128,58 @@ class DepResource(object):
                 'Dependency parsing failed',
                 '{}'.format(e))
 
+class Similarity(object):
+    def on_post(self, req, resp):
+        req_body = req.stream.read()
+        json_data = json.loads(req_body.decode('utf8'))
+        text1 = json_data.get('text1')
+        text2 = json_data.get('text2')
+        model_name = json_data.get('model', 'en')
+
+        try:
+            model = get_model(model_name)
+            sim = Similar(model, text1, text2)
+            resp.body = json.dumps(sim.to_json(), sort_keys=True, indent=2)
+            resp.content_type = 'text/string'
+            resp.append_header('Access-Control-Allow-Origin', "*")
+            if (sim.similarity() >= 0):
+                resp.status = falcon.HTTP_200
+            else:
+                resp.status = falcon.HTTP_500
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                'Dependency parsing failed',
+                '{}'.format(e))
+
+    def on_get(self, req, resp):
+        model_name = 'en'
+        for key, value in req.params.items():
+            if (key == 'text1'):
+                text1 = value
+            if (key == 'text2'):
+                text2 = value
+            if (key == 'model'):
+                model_name = value
+
+        try:
+            model = get_model(model_name)
+            resp.content_type = 'text/string'
+            resp.append_header('Access-Control-Allow-Origin', "*")
+            if (text1 and text2):
+                sim = Similar(model, text1, text2)
+                resp.body = json.dumps(sim.to_json(), sort_keys=True, indent=2)
+                if (sim.similarity() >= 0):
+                    resp.status = falcon.HTTP_200
+                else:
+                    resp.status = falcon.HTTP_500
+            else:
+                resp.status = falcon.HTTP_500
+                resp.body = json.dump({});
+        except Exception as e:
+            raise falcon.HTTPBadRequest(
+                'Schema construction failed',
+                '{}'.format(e))
+
 
 class EntResource(object):
     """Parse text and return displaCy ent's expected output."""
@@ -150,6 +202,7 @@ class EntResource(object):
 
 APP = falcon.API()
 APP.add_route('/dep', DepResource())
+APP.add_route('/sim', Similarity())
 APP.add_route('/ent', EntResource())
 APP.add_route('/{model_name}/schema', SchemaResource())
 APP.add_route('/models', ModelsResource())

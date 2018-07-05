@@ -20,7 +20,7 @@ RUN curl -sL https://deb.nodesource.com/setup_4.x | bash - && \
 
 # Copy and set up the app
 COPY . /app
-RUN cd /app && make clean && make && cd /app/frontend && make clean && make
+RUN cd /app && make clean && make
 
 # Configure nginx & supervisor
 RUN mv /app/config/nginx.conf /etc/nginx/sites-available/default &&\

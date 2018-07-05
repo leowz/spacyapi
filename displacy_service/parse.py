@@ -62,3 +62,23 @@ class Entities(object):
             'text': str(ent)
             } for ent in self.doc.ents
         ]
+
+class Similar(object):
+    def __init__(self, nlp, text1, text2):
+        if (text1 and text2):
+            self.doc1 = nlp(text1)
+            self.doc2 = nlp(text2)
+            self.similarity = self.doc1.similarity(self.doc2)
+        else:
+            self.similarity = -1
+
+    def similarity(self):
+        return self.similarity
+
+    def to_json(self):
+        return [
+            {
+                'similarity': self.similarity
+            }
+        ]
+
