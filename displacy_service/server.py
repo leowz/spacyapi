@@ -142,7 +142,7 @@ class Similarity(object):
             resp.body = json.dumps(sim.to_json(), sort_keys=True, indent=2)
             resp.content_type = 'text/string'
             resp.append_header('Access-Control-Allow-Origin', "*")
-            if (sim.similarity() >= 0):
+            if (sim.similarity >= 0):
                 resp.status = falcon.HTTP_200
             else:
                 resp.status = falcon.HTTP_500
@@ -165,16 +165,16 @@ class Similarity(object):
             model = get_model(model_name)
             resp.content_type = 'text/string'
             resp.append_header('Access-Control-Allow-Origin', "*")
-            if (text1 and text2):
+            if ('text1' in locals() and 'text2' in locals()):
                 sim = Similar(model, text1, text2)
                 resp.body = json.dumps(sim.to_json(), sort_keys=True, indent=2)
-                if (sim.similarity() >= 0):
+                if (sim.similarity >= 0):
                     resp.status = falcon.HTTP_200
                 else:
                     resp.status = falcon.HTTP_500
             else:
                 resp.status = falcon.HTTP_500
-                resp.body = json.dump({});
+                resp.body = json.dump({})
         except Exception as e:
             raise falcon.HTTPBadRequest(
                 'Schema construction failed',

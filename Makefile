@@ -10,6 +10,9 @@ env/bin/python:
 	env/bin/pip install wheel
 	env/bin/pip install -r requirements.txt
 	env/bin/python setup.py develop
+	env/bin/python -m spacy download en
+	env/bin/python -m spacy download fr
+	env/bin/python -m spacy download xx
 
 clean:
 	rm -rfv bin develop-eggs dist downloads eggs env parts .cache .scannerwork

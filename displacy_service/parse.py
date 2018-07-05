@@ -76,9 +76,5 @@ class Similar(object):
         return self.similarity
 
     def to_json(self):
-        return [
-            {
-                'similarity': self.similarity
-            }
-        ]
+        return { 'similarity': self.similarity }
 
